@@ -61,34 +61,35 @@ def count_special_cells(grid):
                 special_cells += 1
     return special_cells
 # Main loop
-for i in range(10):
-    ypoints = np.empty([1, 2000])
-    counter=0
-    running = True
-    while counter<2000:
-        for event in pygame.event.get():
-            counter+=1
-            xpoints[0,counter-1]=counter
-            rate=count_special_cells(grid)
-            ypoints[0,counter-1]=rate
-            if event.type == pygame.QUIT:
-                running = False
-            elif pygame.mouse.get_pressed()[0]:
-                pos = pygame.mouse.get_pos()
-                x, y = pos[0] // cell_size, pos[1] // cell_size
-                grid[x, y] = 1
-            elif pygame.mouse.get_pressed()[2]:
-                pos = pygame.mouse.get_pos()
-                x, y = pos[0] // cell_size, pos[1] // cell_size
-                grid[x, y] = 0
-            random_int = np.random.randint(1, 10) 
-            
-        screen.fill((0, 0, 0))
-        draw_grid(screen, grid)
-        pygame.display.flip()
-        grid = update_grid(grid)
-        pygame.time.delay(20)
-    plt.plot(xpoints, ypoints,color=random_color(),label=f'run_{i+1}')
-    print(f"game number {i} finished")
+# for i in range(10):
+ypoints = np.empty([1, 2000])
+xpoints = np.empty([1, 2000])
+counter=0
+running = True
+while counter<2000:
+    for event in pygame.event.get():
+        counter+=1
+        xpoints[0,counter-1]=counter
+        rate=count_special_cells(grid)
+        ypoints[0,counter-1]=rate
+        if event.type == pygame.QUIT:
+            running = False
+        elif pygame.mouse.get_pressed()[0]:
+            pos = pygame.mouse.get_pos()
+            x, y = pos[0] // cell_size, pos[1] // cell_size
+            grid[x, y] = 1
+        elif pygame.mouse.get_pressed()[2]:
+            pos = pygame.mouse.get_pos()
+            x, y = pos[0] // cell_size, pos[1] // cell_size
+            grid[x, y] = 0
+        random_int = np.random.randint(1, 10) 
+        
+    screen.fill((0, 0, 0))
+    draw_grid(screen, grid)
+    pygame.display.flip()
+    grid = update_grid(grid)
+    pygame.time.delay(20)
+plt.plot(xpoints, ypoints,color=random_color(),label=f'run_{i+1}')
+print(f"game number {i} finished")
 pygame.quit()
 plt.show()

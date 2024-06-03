@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+
 # Initialize Pygame
 pygame.init()
 
@@ -9,14 +10,16 @@ pygame.init()
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Game of Life")
-xpoints = np.empty([1, 2000])
 
 # Define the grid size
 cols, rows = 80, 80
 cell_size = width // cols
-counter=0
+
 # Create the initial grid so that half is green and half is black
 grid = np.random.choice([0, 1], size=(cols, rows), p=[0.5, 0.5])
+
+# Initialize font for rendering text
+font = pygame.font.Font(None, 36)
 
 # Function to draw the grid
 def draw_grid(surface, grid):
@@ -24,9 +27,9 @@ def draw_grid(surface, grid):
         for y in range(rows):
             rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
             if grid[x, y] == 1:
-                 #draws half of the rectangles in green
+                # Draws half of the rectangles in green
                 pygame.draw.rect(surface, (0, 255, 0), rect)
-             #draws the borders in grey
+            # Draws the borders in grey
             pygame.draw.rect(surface, (40, 40, 40), rect, 1)
 
 def update_grid(grid):
@@ -49,8 +52,10 @@ def update_grid(grid):
             if(rand==2):
                 grid[x,y]=random.randint(0,1)       
     return new_grid
+
 def random_color():
     return (random.random(), random.random(), random.random())
+
 def count_special_cells(grid):
     special_cells = 0
     for x in range(1, cols - 1):
@@ -60,36 +65,56 @@ def count_special_cells(grid):
             elif grid[x, y] == 1 and grid[x - 1, y] == 0 and grid[x + 1, y] == 0:
                 special_cells += 1
     return special_cells
+
+# Initialize lists for plotting
+xpoints = np.empty(100)
+generation_count = 0
+ypoints = np.empty(100)
 # Main loop
-# for i in range(10):
-ypoints = np.empty([1, 2000])
-xpoints = np.empty([1, 2000])
-counter=0
-running = True
-while counter<2000:
-    for event in pygame.event.get():
-        counter+=1
-        xpoints[0,counter-1]=counter
-        rate=count_special_cells(grid)
-        ypoints[0,counter-1]=rate
-        if event.type == pygame.QUIT:
-            running = False
-        elif pygame.mouse.get_pressed()[0]:
-            pos = pygame.mouse.get_pos()
-            x, y = pos[0] // cell_size, pos[1] // cell_size
-            grid[x, y] = 1
-        elif pygame.mouse.get_pressed()[2]:
-            pos = pygame.mouse.get_pos()
-            x, y = pos[0] // cell_size, pos[1] // cell_size
-            grid[x, y] = 0
-        random_int = np.random.randint(1, 10) 
+for i in range(0, 10):
+    running = True
+    ypoints = np.zeros(100)
+    while generation_count < 100 and running:
+        for event in pygame.event.get():
+            # if the user closes the window
+            if event.type == pygame.QUIT:
+                running = False
+            elif pygame.mouse.get_pressed()[0]:
+                pos = pygame.mouse.get_pos()
+                x, y = pos[0] // cell_size, pos[1] // cell_size
+                grid[x, y] = 1
+            elif pygame.mouse.get_pressed()[2]:
+                pos = pygame.mouse.get_pos()
+                x, y = pos[0] // cell_size, pos[1] // cell_size
+                grid[x, y] = 0
         
-    screen.fill((0, 0, 0))
-    draw_grid(screen, grid)
-    pygame.display.flip()
-    grid = update_grid(grid)
-    pygame.time.delay(20)
-plt.plot(xpoints, ypoints,color=random_color(),label=f'run_{i+1}')
-print(f"game number {i} finished")
-pygame.quit()
+        screen.fill((0, 0, 0))
+        draw_grid(screen, grid)
+
+        # Update grid and get special cell count
+        grid = update_grid(grid)
+        special_cells = count_special_cells(grid)
+        generation_count += 1
+
+        # Collect data for plotting
+        xpoints[generation_count - 1] = generation_count
+        ypoints[generation_count - 1] = special_cells
+
+        # Render the generation count and special cell count
+        special_cells_text = font.render(f"Special Cells: {special_cells}", True, (255, 255, 255))
+        generation_text = font.render(f"Generations: {generation_count}", True, (255, 255, 255))
+        screen.blit(generation_text, (10, 100))
+        screen.blit(special_cells_text, (10, 50))
+
+        pygame.display.flip()
+        pygame.time.delay(20)
+    # finish the game after 2000 rounds
+    pygame.quit()
+
+    # Plotting the generations vs. special cells using matplotlib
+    plt.plot(xpoints, ypoints, color=random_color(), label='Special Cells Count')
+    plt.xlabel('Generation Count')
+    plt.ylabel('Special Cells Count')
+    plt.title('Special Cells Count over Generations')
+    plt.legend()
 plt.show()

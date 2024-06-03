@@ -51,14 +51,32 @@ def update_grid(grid):
 def random_color():
     return (random.random(), random.random(), random.random())
 
+
 def count_special_cells(grid):
     special_cells = 0
+    cols, rows = grid.shape
+
     for x in range(1, cols - 1):
         for y in range(rows):
             if grid[x, y] == 0 and grid[x - 1, y] == 1 and grid[x + 1, y] == 1:
                 special_cells += 1
             elif grid[x, y] == 1 and grid[x - 1, y] == 0 and grid[x + 1, y] == 0:
                 special_cells += 1
+
+    # Edge case for the leftmost column
+    for y in range(rows):
+        if grid[0, y] == 0 and grid[1, y] == 1:
+            special_cells += 1
+        elif grid[0, y] == 1 and grid[1, y] == 0:
+            special_cells += 1
+
+    # Edge case for the rightmost column
+    for y in range(rows):
+        if grid[cols - 1, y] == 0 and grid[cols - 2, y] == 1:
+            special_cells += 1
+        elif grid[cols - 1, y] == 1 and grid[cols - 2, y] == 0:
+            special_cells += 1
+
     return special_cells
 
 # Main loop for 10 iterations
@@ -67,12 +85,12 @@ for i in range(0,10):
     grid = np.random.choice([0, 1], size=(cols, rows), p=[0.5, 0.5])
 
     # Initialize lists for plotting for each iteration
-    xpoints = np.empty(300)
-    ypoints = np.empty(300)
+    xpoints = np.empty(500)
+    ypoints = np.empty(500)
     generation_count = 0
     running = True
     
-    while generation_count < 300 and running:
+    while generation_count < 500 and running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -104,7 +122,7 @@ for i in range(0,10):
         screen.blit(special_cells_text, (10, 50))
 
         pygame.display.flip()
-        pygame.time.delay(20)
+        pygame.time.delay(10)
 
     # Plotting the generations vs. special cells using matplotlib after each iteration
     plt.plot(xpoints, ypoints, color=random_color(), label=f'Iteration {i+1}')
